@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { db } from './src/firebaseConnection';
-import { doc, getDoc, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot, setDoc, collection, addDoc } from 'firebase/firestore';
 
 export default function App() {
   const [nome, setNome] = useState("Carregando...")
@@ -26,9 +26,33 @@ export default function App() {
     getDados();
   }, [])
 
+  async function handleRegister(){
+    // await setDoc(doc(db, "users", "3"), {
+    //   nome: "José",
+    //   idade: 30,
+    //   cargo: "Back-End"
+    // })
+    // .then(() => {
+    //   console.log("Cadastrado com sucesso!!");
+    // })
+    // .catch((err) => {
+    //   console.log(err);
+    // })
+
+    //id aleatório
+    await addDoc(collection(db, "users"), {
+      nome: "Bianca",
+      idade: 20,
+      cargo: "Front-End"
+    })
+  }
+
   return (
     <View style={styles.container}>
       <Text style={{fontSize: 16}}>Nome: {nome}</Text>
+      <TouchableOpacity style={styles.button} onPress={handleRegister}>
+        <Text style={styles.buttonText}>Adicionar</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -39,4 +63,11 @@ const styles = StyleSheet.create({
     padding: 10,
     paddingTop: 40,
   },
+  button: {
+    backgroundColor: "#000",
+  },
+  buttonText: {
+    padding: 8,
+    color: "#fff"
+  }
 });
