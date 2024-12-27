@@ -16,6 +16,7 @@ import {
   setDoc,
   collection,
   addDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { UserList } from "./src/users";
 
@@ -25,6 +26,7 @@ export default function App() {
   const [cargo, setCargo] = useState("");
   const [showForm, setShowForm] = useState(true);
   const [users, setUsers] = useState([]);
+  const [isEditing, setIsEditing] = useState("");
 
   useEffect(() => {
     async function getDados() {
@@ -86,6 +88,27 @@ export default function App() {
     setShowForm(!showForm);
   }
 
+  function editUser(data){
+    setNome(data.nome);
+    setIdade(data.idade);
+    setCargo(data.cargo);
+    setIsEditing(data.id);
+  }
+
+  async function handleEditUser() {
+    const docRef = doc(db, "users", isEditing);
+    await updateDoc(docRef, {
+      nome: nome,
+      idade: idade,
+      cargo: cargo
+    })
+
+    setNome("");
+    setIdade("");
+    setCargo("");
+    setIsEditing("");
+  }
+
   return (
     <View style={styles.container}>
       {showForm && (
@@ -115,9 +138,15 @@ export default function App() {
             onChangeText={(text) => setCargo(text)}
           />
 
-          <TouchableOpacity style={styles.button} onPress={handleRegister}>
-            <Text style={styles.buttonText}>Adicionar</Text>
-          </TouchableOpacity>
+          { isEditing !== "" ? (
+            <TouchableOpacity style={styles.button} onPress={handleEditUser}>
+              <Text style={styles.buttonText}>Editar usuário</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity style={styles.button} onPress={handleRegister}>
+              <Text style={styles.buttonText}>Adicionar usuário</Text>
+            </TouchableOpacity>
+          )}
         </View>
       )}
 
@@ -133,7 +162,7 @@ export default function App() {
         style={styles.lista}
         data={users}
         keyExtractor={(item) => String(item.id)}
-        renderItem={({ item }) => <UserList data={item} />}
+        renderItem={({ item }) => <UserList data={item} handleEdit={(item) => editUser(item)} />}
       />
     </View>
   );
