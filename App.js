@@ -5,7 +5,7 @@ import {
   View,
   TouchableOpacity,
   TextInput,
-  FlatList
+  FlatList,
 } from "react-native";
 import { db } from "./src/firebaseConnection";
 import {
@@ -17,7 +17,7 @@ import {
   collection,
   addDoc,
 } from "firebase/firestore";
-import { UserList } from './src/users'
+import { UserList } from "./src/users";
 
 export default function App() {
   const [nome, setNome] = useState("");
@@ -28,26 +28,38 @@ export default function App() {
 
   useEffect(() => {
     async function getDados() {
-      
       const usersRef = collection(db, "users");
 
-      getDocs(usersRef)
-      .then((snapshot) => {
+      onSnapshot(usersRef, (snapshot) => {
         let lista = [];
-
         snapshot.forEach((doc) => {
           lista.push({
             id: doc.id,
             nome: doc.data().nome,
             idade: doc.data().idade,
-            cargo: doc.data().cargo
-          })
-        })
+            cargo: doc.data().cargo,
+          });
+        });
         setUsers(lista);
-      })
-      .catch((err) => {
-        console.log(err);
-      })
+      });
+
+      //   getDocs(usersRef)
+      //   .then((snapshot) => {
+      //     let lista = [];
+
+      //     snapshot.forEach((doc) => {
+      //       lista.push({
+      //         id: doc.id,
+      //         nome: doc.data().nome,
+      //         idade: doc.data().idade,
+      //         cargo: doc.data().cargo
+      //       })
+      //     })
+      //     setUsers(lista);
+      //   })
+      //   .catch((err) => {
+      //     console.log(err);
+      //   })
     }
 
     getDados();
@@ -110,20 +122,19 @@ export default function App() {
       )}
 
       <TouchableOpacity style={styles.button} onPress={handleToggle}>
-        <Text style={styles.buttonText}>{ showForm ? "Esconder formulário" : "Mostrar formulário"}</Text>
+        <Text style={styles.buttonText}>
+          {showForm ? "Esconder formulário" : "Mostrar formulário"}
+        </Text>
       </TouchableOpacity>
 
-      <Text style={styles.title}>
-        Usuários
-      </Text>
+      <Text style={styles.title}>Usuários</Text>
 
-      <FlatList 
+      <FlatList
         style={styles.lista}
         data={users}
         keyExtractor={(item) => String(item.id)}
-        renderItem={({item}) => <UserList data={item}/>}
+        renderItem={({ item }) => <UserList data={item} />}
       />
-
     </View>
   );
 }
@@ -163,5 +174,5 @@ const styles = StyleSheet.create({
   },
   lista: {
     marginTop: 8,
-  }
+  },
 });
