@@ -1,8 +1,11 @@
 import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
+import { db } from './firebaseConnection';
+import { deleteDoc, doc } from 'firebase/firestore' 
 
 export function UserList({ data }) {
-  function handleDeleteItem() {
-    console.log(data);
+  async function handleDeleteItem() {
+    const docRef = doc(db, "users", data.id)
+    await deleteDoc(docRef);
   }
 
   return (
