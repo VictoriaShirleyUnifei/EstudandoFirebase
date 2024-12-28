@@ -7,7 +7,7 @@ import {
   TextInput,
   FlatList,
 } from "react-native";
-import { db } from "./firebaseConnection";
+import { db, auth } from "./firebaseConnection";
 import {
   doc,
   getDoc,
@@ -19,6 +19,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { UserList } from "./users";
+import { signOut } from "firebase/auth";
 
 export default function FormUsers() {
   const [nome, setNome] = useState("");
@@ -109,6 +110,10 @@ export default function FormUsers() {
     setIsEditing("");
   }
 
+  async function handleLogout(){
+    await signOut(auth);
+  }
+
   return (
     <View style={styles.container}>
       {showForm && (
@@ -164,6 +169,10 @@ export default function FormUsers() {
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => <UserList data={item} handleEdit={(item) => editUser(item)} />}
       />
+
+      <TouchableOpacity style={[styles.button, {backgroundColor: "#b3261e"}]} onPress={handleLogout}>
+        <Text style={styles.buttonText}>Sair da conta</Text>
+      </TouchableOpacity>
     </View>
   );
 }
