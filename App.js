@@ -7,13 +7,25 @@ import {
 } from "react-native";
 import { auth } from "./src/firebaseConnection";
 import FormUsers from "./src/FormUsers";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { useState } from "react";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "firebase/auth";
+import { useState, useEffect } from "react";
 
 export default function App() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [authUser, setAuthUser] = useState(null);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if(user){
+        setAuthUser({
+          email: user.email,
+          uid: user.uid
+        })
+        return;
+      }
+    }) 
+  }, [])
 
   async function handleCreateUser() {
     const user = await createUserWithEmailAndPassword(
@@ -42,6 +54,11 @@ export default function App() {
     })
   }
 
+  async function handleLogout(){
+    await signOut(auth);
+    setAuthUser(null);
+  }
+
   return (
     <View style={styles.container}>
       {/* <FormUsers /> */}
@@ -67,13 +84,18 @@ export default function App() {
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Entrar</Text>
       </TouchableOpacity>
+
       <TouchableOpacity style={styles.button} onPress={handleCreateUser}>
         <Text style={styles.buttonText}>Cadastrar-se</Text>
       </TouchableOpacity>
 
-      { authUser && (
-        <Text>Usuário logado: {authUser && authUser.email}</Text>
-      )}
+      <TouchableOpacity style={[styles.button, {backgroundColor: "#b3261e"}]} onPress={handleLogout}>
+        <Text style={styles.buttonText}>Sair da conta</Text>
+      </TouchableOpacity>
+
+      
+      <Text>Usuário logado: {authUser && authUser.email}</Text>
+      
     </View>
   );
 }
