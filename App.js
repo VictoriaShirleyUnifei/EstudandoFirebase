@@ -5,15 +5,41 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import { auth } from './src/firebaseConnection';
+import { auth } from "./src/firebaseConnection";
 import FormUsers from "./src/FormUsers";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { useState } from "react";
 
 export default function App() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [authUser, setAuthUser] = useState(null);
 
   async function handleCreateUser() {
-   const user = await createUserWithEmailAndPassword(auth, "teste@gmail.com", "123123");
-   console.log(user);
+    const user = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+    console.log(user);
+  }
+
+  function handleLogin() {
+    signInWithEmailAndPassword(auth, email, password)
+    .then((user) => {
+      console.log(user);
+      setAuthUser({
+        email: user.user.email,
+        uid: user.user.id
+      })
+    })
+    .catch(err => {
+      if(err.code === "auth/missing-password"){
+        console.log("A senha é obrigatória!!")
+        return; 
+      }
+      console.log(err.code);
+    })
   }
 
   return (
@@ -22,17 +48,32 @@ export default function App() {
       <Text style={styles.title}>Bem-vindo!</Text>
 
       <Text style={styles.label}>Email:</Text>
-      <TextInput style={styles.input} placeholder="Digite seu email..." />
+      <TextInput
+        style={styles.input}
+        placeholder="Digite seu email..."
+        value={email}
+        onChangeText={(text) => setEmail(text)}
+      />
 
       <Text style={styles.label}>Senha:</Text>
-      <TextInput style={styles.input} placeholder="Digite sua senha..." />
+      <TextInput
+        style={styles.input}
+        placeholder="Digite sua senha..."
+        value={password}
+        onChangeText={(text) => setPassword(text)}
+        secureTextEntry={true}
+      />
 
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Entrar</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.button} onPress={handleCreateUser}>
         <Text style={styles.buttonText}>Cadastrar-se</Text>
       </TouchableOpacity>
+
+      { authUser && (
+        <Text>Usuário logado: {authUser && authUser.email}</Text>
+      )}
     </View>
   );
 }
@@ -42,7 +83,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     justifyContent: "center",
-    gap: 4
+    gap: 4,
   },
   button: {
     backgroundColor: "#000",
